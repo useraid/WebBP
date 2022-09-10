@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Banner
+# Banner
 
 clear
 cat << EOF
@@ -19,6 +19,8 @@ Welcome to WebBP.
 For options and flags use -h or --help.
 EOF
 
+# Help Function
+
 function help {
 cat <<EOF
 
@@ -35,9 +37,20 @@ your own risk.
 EOF
 }
 
+# Docker Installation Check
 
-while getopts 'hr:' OPTION; do
-  case "$OPTION" in
+function docker {
+  if ! command -v docker &> /dev/null
+  then
+      curl -fsSL https://get.docker.com -o docker.sh
+      sh docker.sh
+  fi
+}
+
+# Selection Flags
+
+while getopts 'hr:' FLAG; do
+  case "$FLAG" in
     h)
       help
       ;;
@@ -45,7 +58,7 @@ while getopts 'hr:' OPTION; do
       rname="$OPTARG"
       echo "value $OPTARG"
       ;;
-    ?)
+    \?)
       echo "usage: $(basename \$0) [-flag] *name for app* " >&2
       exit 1
       ;;
