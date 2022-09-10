@@ -19,11 +19,40 @@ Welcome to WebBP.
 For options and flags use -h or --help.
 EOF
 
+# Selection Flags
+
+main() {
+  while [ $# -gt 0 ]; do
+    case $1 in
+      -h|--help)
+        help
+        exit
+        ;;
+      -m|--mern)
+        mern
+        exit
+        ;;
+      -l|--lamp)
+        lamp
+        exit
+        ;;
+      -p|--portainer)
+        dockerdash
+        exit
+        ;;
+      *)
+        echo "Unknown option $1"
+        help
+        exit 1
+        ;;
+    esac
+  done
+}
+
 # Help Function
 
 function help {
 cat <<EOF
-
 
 This program generates a Boilerplate template for your web applications and deploys the
 services as docker containers.
@@ -37,6 +66,8 @@ your own risk.
         -l|--lamp                LAMP Stack
 
         -m|--mern                MERN Stack
+
+        -p|--portainer           Deploy Portainer
 
 
 EOF
@@ -125,33 +156,10 @@ volumes:
 
 EOF
 
+  echo "<?php phpinfo();" > ~/lamp/webroot/index.php
   docker-compose -f /home/$USER/lamp/docker-compose.yml up -d
   echo "The Stack is deployed on localhost"
 }
 
-# MERN Stack
 
-function mern {
-  
-}
-
-# Selection Flags
-
-while [ $# -gt 0 ]; do
-  case $1 in
-    -h|--help)
-      help
-      ;;
-    -m|--mern)
-      mern
-      ;;
-    -l|--lamp)
-      lamp
-      ;;
-    *)
-      echo "Unknown option $1"
-      help
-      exit 1
-      ;;
-  esac
-done
+main "$@"; exit
