@@ -25,17 +25,18 @@ function help {
 cat <<EOF
 
 
-This program generates a Boilerplate template for your web applications.
+This program generates a Boilerplate template for your web applications and deploys the
+services as docker containers.
     WARNING: Some of the functionality in this program requires root privileges. Use at
 your own risk.
 
     options:
 
-        -h                Display all options and flags. 
+        -h|--help                Display all options and flags. 
 
-        -l                LAMP Stack
+        -l|--lamp                LAMP Stack
 
-        -m                MERN Stack
+        -m|--mern                MERN Stack
 
 
 EOF
@@ -43,6 +44,7 @@ EOF
 
 # Variables
 
+SUUSER=$USER
 TIMEZONE=$(cat /etc/timezone)
 SQLRPASS="rootpwd"
 SQLUSER="user"
@@ -123,7 +125,8 @@ volumes:
 
 EOF
 
-docker-compose -f /home/$USER/lamp/docker-compose.yml up -d
+  docker-compose -f /home/$USER/lamp/docker-compose.yml up -d
+  echo "The Stack is deployed on localhost"
 }
 
 # MERN Stack
@@ -134,19 +137,21 @@ function mern {
 
 # Selection Flags
 
-while getopts 'hr:' FLAG; do
-  case "$FLAG" in
-    h)
+while [ $# -gt 0 ]; do
+  case $1 in
+    -h|--help)
       help
       ;;
-    r)
-      rname="$OPTARG"
-      echo "value $OPTARG"
+    -m|--mern)
+      mern
       ;;
-    \?)
-      echo "usage: $(basename \$0) [-flag] *name for app* " >&2
+    -l|--lamp)
+      lamp
+      ;;
+    *)
+      echo "Unknown option $1"
+      help
       exit 1
       ;;
   esac
 done
-shift "$(($OPTIND -1))"
