@@ -64,8 +64,23 @@ function docker {
       curl -sSL https://get.docker.com/ | sh
       sudo usermod -aG docker $USER
       newgrp docker
-      sudo chmod a+x /usr/local/bin/docker-compose
+      sudo apt-get -y install docker-compose
   fi
+}
+
+# Docker Dashboard
+
+function dockerdash {
+  # Deploying Portainer
+  docker volume create portainer_data
+  docker run -d \
+  --name portainer \
+  -p 9000:9000 \
+  -p 9443:9443 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  --restart=always \
+  portainer/portainer-ce:latest
 }
 
 # LAMP Stack
@@ -94,7 +109,7 @@ services:
             MYSQL_ROOT_PASSWORD: "$SQLRPASS"
             MYSQL_USER: "$SQLUSER"
             MYSQL_PASSWORD: "$SQLPASS"
-            MYSQL_DATABASE: "$SQLDB
+            MYSQL_DATABASE: "$SQLDB"
 
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
@@ -107,7 +122,14 @@ volumes:
     mariadb-volume:
 
 EOF
-sudo docker-compose up -f ~/lamp/docker-compose.yml -d --build
+
+docker-compose -f /home/$USER/lamp/docker-compose.yml up -d
+}
+
+# MERN Stack
+
+function mern {
+  
 }
 
 # Selection Flags
