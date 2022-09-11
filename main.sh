@@ -31,13 +31,21 @@ main() {
         exit
         ;;
       -m|--mern)
+        app=$2
         docker
         mern
         exit
         ;;
       -l|--lamp)
-        # docker
-        # lamp
+        app=$2
+        docker
+        lamp
+        exit
+        ;;
+      -c|--html)
+        app=$2
+        docker
+        html
         exit
         ;;
       -p|--portainer)
@@ -132,9 +140,9 @@ function dockerdash {
 # LAMP Stack
 
 function lamp {
-  mkdir -p ~/$2/webroot
-  touch ~/$2/docker-compose.yml
-  cat << EOF >> ~/$2/docker-compose.yml
+  mkdir -p $HOME/$app/webroot
+  touch $HOME/$app/docker-compose.yml
+  cat << EOF >> $HOME/$app/docker-compose.yml
 version: '3.7'
 
 services:
@@ -169,21 +177,21 @@ volumes:
 
 EOF
 
-  echo "<?php phpinfo();" > ~/$2/webroot/index.php
-  docker-compose -f /home/$USER/$2/docker-compose.yml up -d
+  echo "<?php phpinfo();" > $HOME/$app/webroot/index.php
+  docker-compose -f /home/$USER/$app/docker-compose.yml up -d
   echo "The Stack is deployed on localhost"
 }
 
 # MERN Stack
 
 function mern {
-  mkdir ~/$2/node-backend/
-  touch ~/$2/docker-compose.yml
-  mkdir ~/$2/react-frontend/
-  touch ~/$2/node-backend/Dockerfile
-  touch ~/$2/react-frontend/Dockerfile
+  mkdir $HOME/$app/node-backend/
+  touch $HOME/$app/docker-compose.yml
+  mkdir $HOME/$app/react-frontend/
+  touch $HOME/$app/node-backend/Dockerfile
+  touch $HOME/$app/react-frontend/Dockerfile
 
-cat << EOF >> ~/$2/node-backend/Dockerfile
+cat << EOF >> $HOME/$app/node-backend/Dockerfile
 FROM node:latest
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -194,7 +202,7 @@ EXPOSE 3000
 CMD [ "npm", "start" ]
 EOF
 
-cat << EOF >> ~/$2/react-frontend/Dockerfile
+cat << EOF >> $HOME/$app/react-frontend/Dockerfile
 FROM node:latest
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -203,7 +211,7 @@ EXPOSE 3000
 CMD [ "npm", "start" ]
 EOF
 
-cat << EOF >> ~/$2/docker-compose.yml
+cat << EOF >> $HOME/$app/docker-compose.yml
 version: '2'
 services:
   mongodb:
@@ -228,16 +236,15 @@ services:
       - backend
 EOF
 
-  docker-compose -f /home/$USER/$2/docker-compose.yml up -d
+  docker-compose -f /home/$USER/$app/docker-compose.yml up -d
 
 }
 
 function html {
-  app=$2
-  mkdir ~/$app/
-  touch ~/$app/index.html ~/$app/index.js ~/$app/style.css
+  mkdir $HOME/$app/
+  touch $HOME/$app/index.html $HOME/$app/index.js $HOME/$app/style.css
 
-cat << EOF >> ~/$app/index.html
+cat << EOF >> $HOME/$app/index.html
 <!DOCTYPE html>
 <html lang="en">
   <head>
