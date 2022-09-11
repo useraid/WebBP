@@ -78,6 +78,8 @@ your own risk.
 
         -p|--portainer           Deploy Portainer
 
+        -c|--html                HTML,CSS,JS
+
 
 EOF
 }
@@ -193,7 +195,7 @@ CMD [ "npm", "start" ]
 EOF
 
 cat << EOF >> ~/$2/react-frontend/Dockerfile
-FROM node:6.11.1
+FROM node:latest
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
@@ -227,6 +229,37 @@ services:
 EOF
 
   docker-compose -f /home/$USER/$2/docker-compose.yml up -d
+
+}
+
+function html {
+  app=$2
+  mkdir ~/$app/
+  touch ~/$app/index.html ~/$app/index.js ~/$app/style.css
+
+cat << EOF >> ~/$app/index.html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HTML 5</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+	<script src="index.js"></script>
+  </body>
+</html>
+EOF
+
+# Running in container
+
+docker run -dit \
+--name $app \
+-p 8080:80 \
+-v $HOME/$app/:/usr/local/apache2/htdocs/ \
+httpd:latest
 
 }
 
