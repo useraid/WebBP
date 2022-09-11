@@ -2,7 +2,7 @@
 
 # Banner
 
-clear
+function banner {
 cat << EOF
 
 ██╗    ██╗███████╗██████╗ ██████╗ ██████╗ 
@@ -18,6 +18,7 @@ Welcome to WebBP.
 
 For options and flags use -h or --help.
 EOF
+}
 
 # Selection Flags
 
@@ -25,18 +26,22 @@ main() {
   while [ $# -gt 0 ]; do
     case $1 in
       -h|--help)
+        banner
         help
         exit
         ;;
       -m|--mern)
+        docker
         mern
         exit
         ;;
       -l|--lamp)
-        lamp
+        # docker
+        # lamp
         exit
         ;;
       -p|--portainer)
+        docker
         dockerdash
         exit
         ;;
@@ -58,6 +63,10 @@ This program generates a Boilerplate template for your web applications and depl
 services as docker containers.
     WARNING: Some of the functionality in this program requires root privileges. Use at
 your own risk.
+
+    usage:   
+
+        webbp [--flag] <app-name>
 
     options:
 
@@ -82,18 +91,20 @@ SQLUSER="user"
 SQLPASS="password"
 SQLDB="newdb"
 
-
 # Docker Installation Check
 
 function docker {
+  echo "Checking Dependencies"
   # Curl
   if ! command -v curl &> /dev/null
   then
+      echo "Installing Curl"
       sudo apt-get -y install curl
   fi
   # Docker
   if ! command -v docker &> /dev/null
   then
+      echo "Installing Docker"
       curl -sSL https://get.docker.com/ | sh
       sudo usermod -aG docker $USER
       newgrp docker
@@ -119,9 +130,9 @@ function dockerdash {
 # LAMP Stack
 
 function lamp {
-  mkdir -p ~/lamp/webroot
-  touch ~/lamp/docker-compose.yml
-  cat << EOF >> ~/lamp/docker-compose.yml
+  mkdir -p ~/$2/webroot
+  touch ~/$2/docker-compose.yml
+  cat << EOF >> ~/$2/docker-compose.yml
 version: '3.7'
 
 services:
@@ -156,10 +167,67 @@ volumes:
 
 EOF
 
-  echo "<?php phpinfo();" > ~/lamp/webroot/index.php
-  docker-compose -f /home/$USER/lamp/docker-compose.yml up -d
+  echo "<?php phpinfo();" > ~/$2/webroot/index.php
+  docker-compose -f /home/$USER/$2/docker-compose.yml up -d
   echo "The Stack is deployed on localhost"
 }
 
+# MERN Stack
+
+function mern {
+  mkdir ~/$2/node-backend/
+  touch ~/$2/docker-compose.yml
+  mkdir ~/$2/react-frontend/
+  touch ~/$2/node-backend/Dockerfile
+  touch ~/$2/react-frontend/Dockerfile
+
+cat << EOF >> ~/$2/node-backend/Dockerfile
+FROM node:latest
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+RUN npm install -g nodemon
+
+EXPOSE 3000
+CMD [ "npm", "start" ]
+EOF
+
+cat << EOF >> ~/$2/react-frontend/Dockerfile
+FROM node:6.11.1
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+EXPOSE 3000
+CMD [ "npm", "start" ]
+EOF
+
+cat << EOF >> ~/$2/docker-compose.yml
+version: '2'
+services:
+  mongodb:
+    image: "mongo"
+    ports:
+     - "27017:27017"
+  backend:
+    build: ./node-backend/
+    ports:
+      - "6200:6200"
+    volumes:
+      - ./node-backend:/usr/src/app
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./react-frontend/
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./react-frontend:/usr/src/app
+    depends_on:
+      - backend
+EOF
+
+  docker-compose -f /home/$USER/$2/docker-compose.yml up -d
+
+}
 
 main "$@"; exit
