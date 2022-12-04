@@ -55,6 +55,7 @@ main() {
         ;;
       *)
         echo "Unknown option $1"
+        banner
         help
         exit 1
         ;;
